@@ -22,7 +22,7 @@
 
 [tool.poetry]
 name = "krux"
-version = "25.01.beta4"
+version = "25.01.beta7"
 description = "Open-source signing device firmware for Bitcoin"
 authors = ["Jeff S <jeffreesun@protonmail.com>"]
 

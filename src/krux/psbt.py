@@ -20,8 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import gc
-from embit.psbt import PSBT
-from embit.bip32 import HARDENED_INDEX
+from embit.psbt import PSBT, CompressMode
 from ur.ur import UR
 import urtypes
 from urtypes.crypto import CRYPTO_PSBT
@@ -29,7 +28,7 @@ from .baseconv import base_decode
 from .krux_settings import t
 from .settings import THIN_SPACE
 from .qr import FORMAT_PMOFN, FORMAT_BBQR
-from .key import Key, P2PKH, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
+from .key import Key, P2SH, P2SH_P2WPKH, P2SH_P2WSH, P2WPKH, P2WSH, P2TR
 from .sats_vb import SatsVB
 
 # PSBT Output Types:
@@ -39,6 +38,8 @@ SPEND = 2
 
 # We always uses thin spaces after the ₿ in this file
 BTC_SYMBOL = "₿"
+
+MAX_POLICY_COSIGNERS_DISPLAYED = 5
 
 
 class Counter(dict):
@@ -68,7 +69,7 @@ class PSBTSigner:
             file_path = "/%s/%s" % (SD_PATH, psbt_filename)
             try:
                 with open(file_path, "rb") as file:
-                    self.psbt = PSBT.read_from(file, compress=1)
+                    self.psbt = PSBT.read_from(file)
                 self.validate()
             except:
                 try:
@@ -81,11 +82,12 @@ class PSBTSigner:
                             psbt_data = file.read()
                         self.psbt = PSBT.parse(base_decode(psbt_data, 64))
                     else:
-                        # Legacy will fail to get policy from compressed PSBT
-                        # so we load it uncompressed
+                        # Try to load the PSBT in compressed mode
                         with open(file_path, "rb") as file:
                             file.seek(0)  # Reset the file pointer to the beginning
-                            self.psbt = PSBT.read_from(file)
+                            self.psbt = PSBT.read_from(
+                                file, compress=CompressMode.CLEAR_ALL
+                            )
                 except Exception as e:
                     raise ValueError("Error loading PSBT file: %s" % e)
             self.base_encoding = 64  # In case it is exported as QR code
@@ -148,15 +150,18 @@ class PSBTSigner:
         """Validates the PSBT"""
         # From: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L110
         xpubs = []
+        origin_less_xpub = None
         try:
-            xpubs = self.xpubs()
+            xpubs, origin_less_xpub = self.xpubs()
         except:
             # Expected to fail to get xpubs from Miniscript PSBT
             pass
         for inp in self.psbt.inputs:
             # get policy of the input
             try:
-                inp_policy = self.get_policy_from_psbt_input(inp, xpubs)
+                inp_policy = self.get_policy_from_psbt_input(
+                    inp, xpubs, origin_less_xpub
+                )
             except:
                 raise ValueError("Unable to get policy")
             # if policy is None - assign current
@@ -183,7 +188,7 @@ class PSBTSigner:
             if self.wallet.policy != self.policy:
                 raise ValueError("policy mismatch")
 
-    def get_policy_from_psbt_input(self, tx_input, xpubs):
+    def get_policy_from_psbt_input(self, tx_input, xpubs, origin_less_xpub=None):
         """Extracts the scriptPubKey from an input's UTXO and determines the policy."""
         if tx_input.witness_utxo:
             scriptpubkey = tx_input.witness_utxo.script_pubkey
@@ -193,10 +198,10 @@ class PSBTSigner:
         else:
             raise ValueError("No UTXO information available in the input.")
 
-        return get_policy(tx_input, scriptpubkey, xpubs)
+        return get_policy(tx_input, scriptpubkey, xpubs, origin_less_xpub)
 
     def path_mismatch(self):
-        """Verifies if the PSBT path matches wallet's derivation path"""
+        """Verifies if the PSBT key path matches loaded keys's derivation path"""
         mismatched_paths = []
         der_path_nodes = len(self.wallet.key.derivation.split("/")) - 1
         for _input in self.psbt.inputs:
@@ -205,51 +210,40 @@ class PSBTSigner:
             else:
                 derivations = _input.bip32_derivations
             for pubkey in derivations:
+                # Checks if fingerprint belongs to loaded key
                 if self.policy["type"] == P2TR:
-                    derivation_path = derivations[pubkey][
-                        1
-                    ].derivation  # ignore taproot leaf
+                    fingerprint = derivations[pubkey][1].fingerprint
+                else:
+                    fingerprint = derivations[pubkey].fingerprint
+                if fingerprint != self.wallet.key.fingerprint:
+                    # Not our key, won't check derivation path mismatch
+                    continue
+                if self.policy["type"] == P2TR:
+                    derivation_path = derivations[pubkey][1].derivation
                 else:
                     derivation_path = derivations[pubkey].derivation
                 textual_path = "m"
                 for index in derivation_path[:der_path_nodes]:
                     if index >= 2**31:
-                        textual_path += "/{}h".format(index - 2**31)
+                        textual_path += "/{}'".format(index - 2**31)
                     else:
                         textual_path += "/{}".format(index)
-                if textual_path != self.wallet.key.derivation:
+                if textual_path != self.wallet.key.derivation.replace("h", "'"):
                     if textual_path not in mismatched_paths:
                         mismatched_paths.append(textual_path)
         if mismatched_paths:
             return Key.format_derivation(", ".join(mismatched_paths))
         return ""
 
-    def is_our_miniscript_output(self, psbt_output):
-        """Check if the output is from our wallet"""
+    def address_belongs_to_descriptor(self, psbt_output):
+        """Check if the output is from our wallet descriptor"""
 
-        # TODO: Is comparing fingerprints and paths a trustable method?
-        derivations = psbt_output.bip32_derivations
-        if not derivations:
-            return False
-        for _, derivation in derivations.items():
-            # Check if the fingerprint matches
-            if derivation.fingerprint == self.wallet.key.fingerprint:
-                # Verify the derivation path
-                expected_path_str = self.wallet.key.derivation.split("/")[1:]
-                expected_path_nodes = []
-                for p in expected_path_str:
-                    if "h" in p:
-                        expected_path_nodes.append(int(p[:-1]) + HARDENED_INDEX)
-                    else:
-                        expected_path_nodes.append(int(p))
-
-                if derivation.derivation[:4] == expected_path_nodes:
-                    return True
+        if self.wallet.descriptor:
+            return self.wallet.descriptor.owns(psbt_output)
         return False
 
-    def _classify_output(self, out_policy, i, out):
+    def _classify_output(self, out_policy, out):
         """Classify the output based on its properties and policy"""
-        from embit import script
 
         address_from_my_wallet = False
         address_is_change = False
@@ -262,45 +256,14 @@ class PSBTSigner:
             # so we only need to check that scriptpubkey is generated from
             # witness script
 
-            # empty script by default
-            sc = script.Script(b"")
-            if self.policy["type"] == P2WSH:
-                try:
-                    # if multisig, we know witness script
-                    sc = script.p2wsh(out.witness_script)
-                except:
-                    # Expected to fail with Miniscript PSBT
-                    pass
-            elif self.policy["type"] == P2SH_P2WSH:
-                sc = script.p2sh(script.p2wsh(out.witness_script))
-            # single-sig
-            elif "pkh" in self.policy["type"]:
-                if len(list(out.bip32_derivations.values())) > 0:
-                    der = list(out.bip32_derivations.values())[0].derivation
-                    my_hd_prvkey = self.wallet.key.root.derive(der)
-                    if self.policy["type"] == P2WPKH:
-                        sc = script.p2wpkh(my_hd_prvkey)
-                    elif self.policy["type"] == P2SH_P2WPKH:
-                        sc = script.p2sh(script.p2wpkh(my_hd_prvkey))
-                    elif self.policy["type"] == P2PKH:
-                        sc = script.p2pkh(my_hd_prvkey)
+            address_from_my_wallet = self.address_belongs_to_descriptor(out)
 
             if self.policy["type"] == P2TR:
-                address_from_my_wallet = (
-                    len(list(out.taproot_bip32_derivations.values())) > 0
-                )
                 if address_from_my_wallet:
                     # _ = leafs
                     _, der = list(out.taproot_bip32_derivations.values())[0]
-                    address_is_change = der.derivation[3] == 1
+                    address_is_change = der.derivation[-2] == 1
             else:
-                if sc.data:
-                    address_from_my_wallet = (
-                        sc.data == self.psbt.tx.vout[i].script_pubkey.data
-                    )
-                else:
-                    # If the script is empty, we compare fingerprints and paths
-                    address_from_my_wallet = self.is_our_miniscript_output(out)
                 if address_from_my_wallet:
                     address_is_change = (
                         len(list(out.bip32_derivations.values())) > 0
@@ -342,15 +305,18 @@ class PSBTSigner:
         output_policy_count = Counter()
 
         xpubs = []
+        origin_less_xpub = None
         try:
-            xpubs = self.xpubs()
+            xpubs, origin_less_xpub = self.xpubs()
         except:
             # Expected to fail to get xpubs from Miniscript PSBT
             pass
         for i, out in enumerate(self.psbt.outputs):
-            out_policy = get_policy(out, self.psbt.tx.vout[i].script_pubkey, xpubs)
+            out_policy = get_policy(
+                out, self.psbt.tx.vout[i].script_pubkey, xpubs, origin_less_xpub
+            )
             output_policy_count[out_policy["type"]] += 1
-            output_type = self._classify_output(out_policy, i, out)
+            output_type = self._classify_output(out_policy, out)
 
             if output_type == CHANGE:
                 change_list.append(
@@ -504,34 +470,46 @@ class PSBTSigner:
                     filled += 1
         return filled
 
-    def sign(self):
-        """Signs the PSBT removing all irrelevant data"""
+    def sign(self, trim=True):
+        """Signs the PSBT and preserves necessary fields for the final transaction"""
         self.add_signatures()
+
+        if not trim:
+            return
 
         trimmed_psbt = PSBT(self.psbt.tx)
         for i, inp in enumerate(self.psbt.inputs):
-            # Copy the final_scriptwitness if it's present (Taproot case)
+            # Copy the final_scriptwitness if present
             if inp.final_scriptwitness:
                 trimmed_psbt.inputs[i].final_scriptwitness = inp.final_scriptwitness
-            # Copy partial signatures for multisig or other script types
+
+            # Copy any partial signatures
             if inp.partial_sigs:
                 trimmed_psbt.inputs[i].partial_sigs = inp.partial_sigs
 
-            # Include the PSBT_IN_WITNESS_UTXO field if it exists
-            if hasattr(inp, "witness_utxo"):
+            # Preserve witness UTXO if present
+            if inp.witness_utxo:
                 trimmed_psbt.inputs[i].witness_utxo = inp.witness_utxo
 
-            # Include the PSBT_IN_NON_WITNESS_UTXO field if it exists (Legacy)
-            if hasattr(inp, "non_witness_utxo"):
+            # Preserve non-witness UTXO if present (for legacy inputs)
+            if inp.non_witness_utxo:
                 trimmed_psbt.inputs[i].non_witness_utxo = inp.non_witness_utxo
 
-            # Check for P2SH (Nested SegWit) and copy redeem_script if present
-            if hasattr(inp, "redeem_script"):
+            # Preserve redeem_script for P2SH or nested SegWit
+            if inp.redeem_script:
                 trimmed_psbt.inputs[i].redeem_script = inp.redeem_script
 
-            # Check for P2WSH (SegWit multisig) and copy witness_script if present
-            if hasattr(inp, "witness_script"):
+            # Preserve witness_script for P2WSH multisig
+            if inp.witness_script:
                 trimmed_psbt.inputs[i].witness_script = inp.witness_script
+
+            # Preserve taproot_key_sig for Taproot inputs
+            if inp.taproot_key_sig:
+                trimmed_psbt.inputs[i].taproot_key_sig = inp.taproot_key_sig
+
+            # Preserve taproot script path sigs
+            if inp.taproot_sigs:
+                trimmed_psbt.inputs[i].taproot_sigs = inp.taproot_sigs
 
         self.psbt = trimmed_psbt
 
@@ -570,24 +548,65 @@ class PSBTSigner:
         from embit.psbt import DerivationPath
 
         if self.psbt.xpubs:
-            return self.psbt.xpubs
+            return self.psbt.xpubs, None
 
         if not self.wallet.descriptor:
             raise ValueError("missing xpubs")
 
         descriptor_keys = (
-            [self.wallet.descriptor.key]
-            if self.wallet.descriptor.key
-            else self.wallet.descriptor.keys
+            self.wallet.descriptor.keys
+            if self.wallet.descriptor.keys
+            else [self.wallet.descriptor.key]
         )
         xpubs = {}
+        origin_less_xpub = None
         for descriptor_key in descriptor_keys:
             if descriptor_key.origin:
                 # Pure xpub descriptors (Blue Wallet) don't have origin data
                 xpubs[descriptor_key.key] = DerivationPath(
                     descriptor_key.origin.fingerprint, descriptor_key.origin.derivation
                 )
-        return xpubs
+            elif len(descriptor_keys) > 1:
+                # Allow one descriptor key without origin data for taproot
+                # Pure taptree descriptors won't have origin data for internal key
+                origin_less_xpub = descriptor_key.key
+
+        return xpubs, origin_less_xpub
+
+    def psbt_policy_string(self):
+        """Returns the policy string containing script type and cosigners' fingerprints"""
+
+        policy_str = "PSBT policy:\n"
+        policy_str += self.policy["type"] + "\n"
+        if is_multisig(self.policy):
+            policy_str += str(self.policy["m"]) + " of " + str(self.policy["n"]) + "\n"
+        fingerprints = []
+        for inp in self.psbt.inputs:
+            # Do we need to loop through all the inputs or just one?
+            if self.policy["type"] == P2WSH:
+                for pub in inp.bip32_derivations:
+                    fingerprint_srt = Key.format_fingerprint(
+                        inp.bip32_derivations[pub].fingerprint, True
+                    )
+                    if fingerprint_srt not in fingerprints:
+                        if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
+                            fingerprints[-1] = "..."
+                            break
+                        fingerprints.append(fingerprint_srt)
+            elif self.policy["type"] == P2TR:
+                for pub in inp.taproot_bip32_derivations:
+                    _, derivation_path = inp.taproot_bip32_derivations[pub]
+                    fingerprint_srt = Key.format_fingerprint(
+                        derivation_path.fingerprint, True
+                    )
+                    if fingerprint_srt not in fingerprints:
+                        if len(fingerprints) > MAX_POLICY_COSIGNERS_DISPLAYED:
+                            fingerprints[-1] = "..."
+                            break
+                        fingerprints.append(fingerprint_srt)
+
+        policy_str += "\n".join(fingerprints)
+        return policy_str
 
 
 def is_multisig(policy):
@@ -606,7 +625,8 @@ def is_miniscript(policy):
     # m and n will not be present in miniscript policies
     return (
         "type" in policy
-        and P2WSH in policy["type"]
+        and policy["type"] in (P2WSH, P2TR)
+        and "miniscript" in policy
         and "m" not in policy
         and "n" not in policy
     )
@@ -637,7 +657,7 @@ def get_cosigners(pubkeys, derivations, xpubs):
 
 
 def get_cosigners_miniscript(derivations, xpubs):
-    """Returns xpubs used to derive pubkeys listed in derivations."""
+    """Compares the derivations with the xpubs to check and get the cosigners"""
     cosigners = []
     for pubkey, der in derivations.items():
         for xpub in xpubs:
@@ -653,12 +673,50 @@ def get_cosigners_miniscript(derivations, xpubs):
                         break
     # Ensure all pubkeys have a matching xpub
     if len(cosigners) != len(derivations):
-        raise ValueError("Not all pubkeys in derivations have corresponding xpubs")
+        raise ValueError("cannot get all cosigners")
+    return sorted(cosigners)
+
+
+def get_cosigners_taproot_miniscript(taproot_derivations, xpubs, origin_less_xpub=None):
+    """
+    Compares the taproot derivations with the xpubs to check get the cosigners
+    """
+
+    cosigners = []
+    for xonly_pubkey, der_info in taproot_derivations.items():
+        _, der = der_info  # tap_leaf_hashes are not used
+        fp = der.fingerprint
+        full_path = der.derivation
+
+        for xpub in xpubs:
+            origin_der = xpubs[xpub]
+            # Check that the fingerprint matches
+            if origin_der.fingerprint == fp:
+                # Check that the origin derivation is a prefix of the full derivation path
+                if full_path[: len(origin_der.derivation)] == origin_der.derivation:
+                    # Derive the remainder of the path
+                    remainder = full_path[len(origin_der.derivation) :]
+                    # Verify that the xpub derives to the given xonly_pubkey
+                    derived_key = xpub.derive(remainder).key
+                    if derived_key.xonly() == xonly_pubkey.xonly():
+                        # Append the xpub as a base58 string
+                        cosigners.append(xpub.to_base58())
+                        break
+
+    if origin_less_xpub:
+        # Pocicies which don't cover internal key spending (e.g. taptree only)
+        # can have an origin-less xpub for internal key derivation
+        cosigners.append(origin_less_xpub.to_base58())
+
+    # Ensure all pubkeys have a matching xpub
+    if len(cosigners) != len(taproot_derivations):
+        raise ValueError("cannot get all cosigners")
+
     return sorted(cosigners)
 
 
 # Modified from: https://github.com/diybitcoinhardware/embit/blob/master/examples/change.py#L64
-def get_policy(scope, scriptpubkey, xpubs):
+def get_policy(scope, scriptpubkey, xpubs, origin_less_xpub=None):
     """Parse scope and get policy"""
     from embit.finalizer import parse_multisig
 
@@ -688,9 +746,28 @@ def get_policy(scope, scriptpubkey, xpubs):
         except:
             try:
                 # Try to parse as miniscript
+                policy.update({"miniscript": P2WSH})
                 # Will succeed to verify cosigners only if the descriptor is loaded
                 cosigners = get_cosigners_miniscript(scope.bip32_derivations, xpubs)
                 policy.update({"cosigners": cosigners})
             except:
                 pass
+    elif script_type == P2TR:
+        try:
+            # Try to parse as taproot miniscript
+            if len(scope.taproot_bip32_derivations) > 1:
+                # Assume is miniscript if there are multiple cosigners
+                policy.update({"miniscript": P2TR})
+
+            # Will succeed to verify cosigners only if the descriptor is loaded
+            cosigners = get_cosigners_taproot_miniscript(
+                scope.taproot_bip32_derivations, xpubs, origin_less_xpub
+            )
+            # Only add cosigners if is miniscript (multiple cosigners),
+            # otherwise it probably is single-sig taproot
+            if len(cosigners) > 1:
+                policy.update({"cosigners": cosigners})
+        except Exception as e:
+            print("Error getting taproot PSBT cosigners: ", e)
+
     return policy

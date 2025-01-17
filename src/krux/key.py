@@ -114,20 +114,30 @@ class Key:
         passphrase="",
         account_index=0,
         script_type=P2WPKH,
+        custom_derivation="",
     ):
         self.mnemonic = mnemonic
         self.policy_type = policy_type
         self.network = network
         self.passphrase = passphrase
         self.account_index = account_index
-        self.script_type = script_type if policy_type == TYPE_SINGLESIG else P2WSH
+        if policy_type == TYPE_MULTISIG and script_type != P2WSH:
+            script_type = P2WSH
+        if policy_type == TYPE_MINISCRIPT and script_type not in (P2WSH, P2TR):
+            script_type = P2WSH
+        self.script_type = script_type
         self.root = bip32.HDKey.from_seed(
             bip39.mnemonic_to_seed(mnemonic, passphrase), version=network["xprv"]
         )
         self.fingerprint = self.root.child(0).fingerprint
-        self.derivation = self.get_default_derivation(
-            self.policy_type, self.network, self.account_index, self.script_type
-        )
+        if not custom_derivation:
+            self.derivation = self.get_default_derivation(
+                self.policy_type, self.network, self.account_index, self.script_type
+            )
+            self.custom_derivation = False
+        else:
+            self.derivation = custom_derivation
+            self.custom_derivation = True
         self.account = self.root.derive(self.derivation).to_public()
 
     def xpub(self, version=None):

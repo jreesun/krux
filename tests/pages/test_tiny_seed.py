@@ -39,7 +39,7 @@ def test_export_tiny_seed(m5stickv, mocker):
     from krux.pages.tiny_seed import TinySeed
     from krux.input import BUTTON_ENTER
     from krux.wallet import Wallet
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from embit.networks import NETWORKS
 
     BTN_SEQUENCE = [
@@ -50,7 +50,7 @@ def test_export_tiny_seed(m5stickv, mocker):
     TEST_24_WORD_MNEMONIC = "brush badge sing still venue panther kitchen please help panel bundle excess sign couch stove increase human once effort candy goat top tiny major"
     # Amount of rectangles filled for this mnemonic + menus
     FILLED_RECTANGLES = 137
-    SINGLESIG_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, False, NETWORKS["main"])
+    SINGLESIG_24_WORD_KEY = Key(TEST_24_WORD_MNEMONIC, TYPE_SINGLESIG, NETWORKS["main"])
     ctx = create_ctx(mocker, BTN_SEQUENCE, Wallet(SINGLESIG_24_WORD_KEY), MockPrinter())
     tiny_seed = TinySeed(ctx)
     tiny_seed.export()

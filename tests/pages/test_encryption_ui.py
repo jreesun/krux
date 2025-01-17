@@ -117,7 +117,7 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
     from krux.krux_settings import Settings
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.pages.encryption_ui import EncryptMnemonic
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from embit.networks import NETWORKS
 
     BTN_SEQUENCE = (
@@ -128,7 +128,7 @@ def test_encrypt_cbc_sd_ui(m5stickv, mocker, mock_file_operations):
         + [BUTTON_ENTER]  # Confirm encryption ID
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
-    ctx.wallet = Wallet(Key(CBC_WORDS, False, NETWORKS["main"]))
+    ctx.wallet = Wallet(Key(CBC_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
     storage_ui = EncryptMnemonic(ctx)
     mocker.patch(
         "krux.pages.encryption_ui.EncryptionKey.encryption_key",
@@ -152,7 +152,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
     from krux.krux_settings import Settings
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.pages.encryption_ui import EncryptMnemonic
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from embit.networks import NETWORKS
 
     BTN_SEQUENCE = (
@@ -163,7 +163,7 @@ def test_encrypt_to_qrcode_ecb_ui(m5stickv, mocker):
         # QR view is mocked here, no press needed
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
-    ctx.wallet = Wallet(Key(ECB_WORDS, False, NETWORKS["main"]))
+    ctx.wallet = Wallet(Key(ECB_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
     ctx.printer = None
     storage_ui = EncryptMnemonic(ctx)
     mocker.patch(
@@ -188,7 +188,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
     from krux.krux_settings import Settings
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.pages.encryption_ui import EncryptMnemonic
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from embit.networks import NETWORKS
 
     BTN_SEQUENCE = (
@@ -200,7 +200,7 @@ def test_encrypt_to_qrcode_cbc_ui(m5stickv, mocker):
         # QR view is mocked here, no press needed
     )
     ctx = create_ctx(mocker, BTN_SEQUENCE)
-    ctx.wallet = Wallet(Key(CBC_WORDS, False, NETWORKS["main"]))
+    ctx.wallet = Wallet(Key(CBC_WORDS, TYPE_SINGLESIG, NETWORKS["main"]))
     ctx.printer = None
     storage_ui = EncryptMnemonic(ctx)
     mocker.patch(

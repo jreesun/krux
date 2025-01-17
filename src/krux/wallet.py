@@ -38,6 +38,14 @@ from .key import (
     TYPE_MINISCRIPT,
 )
 
+# Liana uses a example NUMS (Nothing-Up-My-Sleeve) key from BIP341 to create unspendable keys
+# https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#constructing-and-spending-taproot-outputs
+# https://delvingbitcoin.org/t/unspendable-keys-in-descriptors/304/21
+# H = lift_x(0x50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0)
+BIP_341_NUMS_EXAMPLE = (
+    "0250929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0"
+)
+
 
 class AssumptionWarning(Exception):
     """An exception for assumptions that require user acceptance"""
@@ -108,12 +116,39 @@ class Wallet:
         if self.descriptor:
             if self.descriptor.is_basic_multisig:
                 return False
-            return self.descriptor.miniscript is not None
+            return (
+                self.descriptor.miniscript is not None
+                or self.descriptor.taptree  #  taptree is "" when not present
+            )
         return False
 
     def is_loaded(self):
         """Returns a boolean indicating whether or not this wallet has been loaded"""
         return self.wallet_data is not None
+
+    def _validate_descriptor(self, descriptor, descriptor_xpubs):
+        """Validates the descriptor against the current key and policy type"""
+
+        if self.is_multisig():
+            if not descriptor.is_basic_multisig:
+                raise ValueError("not multisig")
+            if self.key.xpub() not in descriptor_xpubs:
+                raise ValueError("xpub not a multisig cosigner")
+        elif self.is_miniscript():
+            if self.key.script_type == P2WSH:
+                if descriptor.miniscript is None or descriptor.is_basic_multisig:
+                    raise ValueError("not P2WSH miniscript")
+            elif self.key.script_type == P2TR:
+                if not descriptor.taptree:
+                    raise ValueError("not P2TR miniscript")
+            if self.key.xpub() not in descriptor_xpubs:
+                raise ValueError("xpub not a miniscript cosigner")
+        else:
+            if not descriptor.key:
+                if len(descriptor.keys) > 1:
+                    raise ValueError("not single-sig")
+            if self.key.xpub() != descriptor_xpubs[0]:
+                raise ValueError("xpub does not match")
 
     def load(self, wallet_data, qr_format, allow_assumption=None):
         """Loads the wallet from the given data"""
@@ -128,29 +163,16 @@ class Wallet:
             )
 
         if self.key:
-            if self.is_multisig():
-                if not descriptor.is_basic_multisig:
-                    raise ValueError("not multisig")
-                if self.key.xpub() not in descriptor_xpubs:
-                    raise ValueError("xpub not a multisig cosigner")
-            elif self.is_miniscript():
-                if descriptor.miniscript is None or descriptor.is_basic_multisig:
-                    raise ValueError("not miniscript")
-                if self.key.xpub() not in descriptor_xpubs:
-                    raise ValueError("xpub not a miniscript cosigner")
-            else:
-                if not descriptor.key:
-                    if len(descriptor.keys) > 1:
-                        raise ValueError("not single-sig")
-                if self.key.xpub() != descriptor_xpubs[0]:
-                    raise ValueError("xpub does not match")
+            try:
+                self._validate_descriptor(descriptor, descriptor_xpubs)
+            except ValueError as e:
+                raise ValueError("Invalid Descriptor: %s" % e)
 
         self.wallet_data = wallet_data
         self.wallet_qr_format = qr_format
         self.descriptor = to_unambiguous_descriptor(descriptor)
         self.label = label
-
-        if self.descriptor.key:
+        if self.descriptor.key and not self.descriptor.taptree:
             if not self.label:
                 self.label = t("Single-sig")
             self.policy = {"type": self.descriptor.scriptpubkey_type()}
@@ -168,14 +190,50 @@ class Wallet:
                 "n": n,
                 "cosigners": cosigners,
             }
-        elif self.descriptor.miniscript is not None:
+        elif self.descriptor.miniscript is not None or self.descriptor.taptree:
+            if self.descriptor.taptree:
+                if not descriptor.keys[0].origin:
+                    import hashlib
+                    from embit.ec import PublicKey
+                    from embit.bip32 import HDKey
+
+                    # In case internal key is disabled, check if NUMS is known
+
+                    # Hash all pubkeys, except internal, to compute deterministic chain code
+                    hasher = hashlib.sha256()
+                    for key in descriptor.keys[1:]:
+                        hasher.update(key.sec())
+                    det_chain_code = hasher.digest()
+
+                    # Use BIP341 NUMS as public key
+                    public_key = PublicKey.from_string(BIP_341_NUMS_EXAMPLE)
+
+                    # Create provably unspendable deterministic key
+                    version = self.descriptor.keys[0].key.version
+                    provably_unspendable = HDKey(
+                        public_key, det_chain_code, version=version
+                    )
+
+                    # Compare expected provably unspendable key with first descriptor key
+                    if (
+                        descriptor.keys[0].key.to_base58()
+                        != provably_unspendable.to_base58()
+                    ):
+                        raise ValueError("Internal key not provably unspendable")
+
+                taproot_txt = "TR "
+                miniscript_type = P2TR
+            else:
+                taproot_txt = ""
+                miniscript_type = P2WSH
             if not self.label:
-                self.label = t("Miniscript")
+                self.label = taproot_txt + t("Miniscript")
             cosigners = [key.key.to_base58() for key in self.descriptor.keys]
             cosigners = sorted(cosigners)
             self.policy = {
                 "type": self.descriptor.scriptpubkey_type(),
                 "cosigners": cosigners,
+                "miniscript": miniscript_type,
             }
 
     def wallet_qr(self):
@@ -194,6 +252,10 @@ class Wallet:
     def obtain_addresses(self, i=0, limit=None, branch_index=0):
         """Returns an iterator deriving addresses (default branch_index is receive)
         for the wallet up to the provided limit"""
+
+        if self.descriptor is None:
+            raise ValueError("No descriptor to derive addresses from")
+
         starting_index = i
 
         while limit is None or i < starting_index + limit:

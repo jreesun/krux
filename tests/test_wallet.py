@@ -8,7 +8,15 @@ def tdata(mocker):
     from collections import namedtuple
     from ur.ur import UR
     from embit.networks import NETWORKS
-    from krux.key import Key, P2PKH, P2SH_P2WPKH, P2TR
+    from krux.key import (
+        Key,
+        P2PKH,
+        P2SH_P2WPKH,
+        P2TR,
+        TYPE_SINGLESIG,
+        TYPE_MULTISIG,
+        TYPE_MINISCRIPT,
+    )
 
     TEST_MNEMONIC1 = (
         "olympic term tissue route sense program under choose bean emerge velvet absurd"
@@ -17,14 +25,20 @@ def tdata(mocker):
     TEST_MNEMONIC3 = "range fatigue into stadium endless kitchen royal present rally welcome scatter twice"
 
     SINGLESIG_KEY = Key(
-        TEST_MNEMONIC1, False, NETWORKS["main"]
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"]
     )  # default account=0, script=P2WPKH
-    LEGACY1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2PKH)
-    NESTEDSW1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2SH_P2WPKH)
-    TAPROOT1_KEY = Key(TEST_MNEMONIC1, False, NETWORKS["main"], "", 1, P2TR)
-    MULTISIG_KEY1 = Key(TEST_MNEMONIC1, True, NETWORKS["main"])
-    MULTISIG_KEY2 = Key(TEST_MNEMONIC2, True, NETWORKS["main"])
-    MULTISIG_KEY3 = Key(TEST_MNEMONIC3, True, NETWORKS["main"])
+    LEGACY1_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2PKH)
+    NESTEDSW1_KEY = Key(
+        TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2SH_P2WPKH
+    )
+    TAPROOT1_KEY = Key(TEST_MNEMONIC1, TYPE_SINGLESIG, NETWORKS["main"], "", 1, P2TR)
+    MULTISIG_KEY1 = Key(TEST_MNEMONIC1, TYPE_MULTISIG, NETWORKS["main"])
+    MULTISIG_KEY2 = Key(TEST_MNEMONIC2, TYPE_MULTISIG, NETWORKS["main"])
+    MULTISIG_KEY3 = Key(TEST_MNEMONIC3, TYPE_MULTISIG, NETWORKS["main"])
+    MINISCRIPT_KEY = Key(TEST_MNEMONIC1, TYPE_MINISCRIPT, NETWORKS["main"])
+    TAP_MINISCRIPT_KEY = Key(
+        TEST_MNEMONIC1, TYPE_MINISCRIPT, NETWORKS["main"], script_type=P2TR
+    )
 
     # SINGLESIG_KEY [55f8fc5d/84h/0h/0h]xpub6DPMTPxGMqdtzMwpqT1dDQaVdyaEppEm2qYSaJ7ANsuES7HkNzrXJst1Ed8D7NAnijUdgSDUFgph1oj5LKKAD5gyxWNhNP2AuDqaKYqzphA
     # MULTISIG_KEY1 [55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy
@@ -157,6 +171,9 @@ def tdata(mocker):
 
     UNSORTED_MULTISIG_DESCRIPTOR = "wsh(multi(2,[3e15470d/48h/0h/0h/2h]xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*,[55f8fc5d/48h/0h/0h/2h]xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,[d3a80c8b/48h/0h/0h/2h]xpub6FKYY6y3oVi7ihSCszFKRSeZj5SzrfSsUFXhKqjMV4iigrLhxwMX3mrjioNyLTZ5iD3u4wU9S3tyzpJGxhd5geaXoQ68jGz2M6dfh2zJrUv/<0;1>/*))"
 
+    LIANA_MINISCRIPT_DESCRIPTOR = "wsh(or_d(pk([55f8fc5d/48'/0'/0'/2']xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*),and_v(v:pkh([3e15470d/48'/0'/0'/2']xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*),older(6))))#x09nw3rv"
+    LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR = "tr([55f8fc5d/48'/0'/0'/2']xpub6EKmKYGYc1WY6t9d3d9SksR8keSaPZbFa6tqsGiH4xVxx8d2YyxSX7WG6yXEX3CmG54dPCxaapDw1XsjwCmfoqP7tbsAeqMVfKvqSAu4ndy/<0;1>/*,and_v(v:pk([3e15470d/48'/0'/0'/2']xpub6F2P6Pz5KLPgCc6pTBd2xxCunaSYWc8CdkL28W5z15pJrN3aCYY7mCUAkCMtqrgT2wdhAGgRnJxAkCCUpGKoXKxQ57yffEGmPwtYA3DEXwu/<0;1>/*),older(6)))#qjluv5ue"
+
     return namedtuple(
         "TestData",
         [
@@ -170,6 +187,8 @@ def tdata(mocker):
             "MULTISIG_KEY1",
             "MULTISIG_KEY2",
             "MULTISIG_KEY3",
+            "MINISCRIPT_KEY",
+            "TAP_MINISCRIPT_KEY",
             "KRUX_LEGACY1_DESCRIPTOR",
             "KRUX_LEGACY1_XPUB",
             "KRUX_NESTEDSW1_DESCRIPTOR",
@@ -208,6 +227,8 @@ def tdata(mocker):
             "UNRELATED_SINGLESIG_DESCRIPTOR",
             "UNRELATED_MULTISIG_DESCRIPTOR",
             "UNSORTED_MULTISIG_DESCRIPTOR",
+            "LIANA_MINISCRIPT_DESCRIPTOR",
+            "LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR",
         ],
     )(
         TEST_MNEMONIC1,
@@ -220,6 +241,8 @@ def tdata(mocker):
         MULTISIG_KEY1,
         MULTISIG_KEY2,
         MULTISIG_KEY3,
+        MINISCRIPT_KEY,
+        TAP_MINISCRIPT_KEY,
         KRUX_LEGACY1_DESCRIPTOR,
         KRUX_LEGACY1_XPUB,
         KRUX_NESTEDSW1_DESCRIPTOR,
@@ -258,6 +281,8 @@ def tdata(mocker):
         UNRELATED_SINGLESIG_DESCRIPTOR,
         UNRELATED_MULTISIG_DESCRIPTOR,
         UNSORTED_MULTISIG_DESCRIPTOR,
+        LIANA_MINISCRIPT_DESCRIPTOR,
+        LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR,
     )
 
 
@@ -313,7 +338,6 @@ def test_init_singlesig(mocker, m5stickv, tdata):
 
 def test_init_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
-    from krux.qr import FORMAT_NONE
 
     wallet = Wallet(tdata.MULTISIG_KEY1)
     assert isinstance(wallet, Wallet)
@@ -322,6 +346,16 @@ def test_init_multisig(mocker, m5stickv, tdata):
     assert wallet.policy is None
 
     wallet = Wallet(None)
+    assert isinstance(wallet, Wallet)
+    assert wallet.descriptor is None
+    assert wallet.label is None
+    assert wallet.policy is None
+
+
+def test_init_miniscript(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+
+    wallet = Wallet(tdata.MINISCRIPT_KEY)
     assert isinstance(wallet, Wallet)
     assert wallet.descriptor is None
     assert wallet.label is None
@@ -330,19 +364,103 @@ def test_init_multisig(mocker, m5stickv, tdata):
 
 def test_is_multisig(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
 
+    # Non multisig keys
     wallet = Wallet(tdata.SINGLESIG_KEY)
     assert not wallet.is_multisig()
 
+    wallet = Wallet(tdata.TAPROOT1_KEY)
+    assert not wallet.is_multisig()
+
+    wallet = Wallet(tdata.MINISCRIPT_KEY)
+    assert not wallet.is_multisig()
+
+    # Multisig key
     wallet = Wallet(tdata.MULTISIG_KEY1)
     assert wallet.is_multisig()
 
-    wallet = Wallet(None)
-    assert not wallet.is_multisig()
-    from krux.qr import FORMAT_NONE
-
+    # Multisig key with loaded descriptor
     wallet.load(tdata.SPECTER_MULTISIG_DESCRIPTOR, FORMAT_NONE)
     assert wallet.is_multisig()
+
+    # No key, no descriptor
+    wallet = Wallet(None)
+    assert not wallet.is_multisig()
+
+    # Sans key: Descriptor only, no key loaded
+    # Multisig descriptor
+    wallet.load(tdata.SPECTER_MULTISIG_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.is_multisig()
+
+    # Single-sig descriptor
+    wallet = Wallet(None)
+    wallet.load(tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_NONE)
+    assert not wallet.is_multisig()
+
+    # Taproot single-sig descriptor
+    wallet = Wallet(None)
+    wallet.load(tdata.KRUX_TAPROOT1_DESCRIPTOR, FORMAT_NONE)
+    assert not wallet.is_multisig()
+
+    # Miniscript descriptor
+    wallet = Wallet(None)
+    wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert not wallet.is_multisig()
+
+    # Taproot miniscript descriptor
+    wallet = Wallet(None)
+    wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert not wallet.is_multisig()
+
+
+def test_is_miniscript(mocker, m5stickv, tdata):
+    from krux.wallet import Wallet
+    from krux.qr import FORMAT_NONE
+
+    # Non multisig keys
+    wallet = Wallet(tdata.SINGLESIG_KEY)
+    assert not wallet.is_miniscript()
+
+    wallet = Wallet(tdata.TAPROOT1_KEY)
+    assert not wallet.is_miniscript()
+
+    wallet = Wallet(tdata.MULTISIG_KEY1)
+    assert not wallet.is_miniscript()
+
+    # Miniscript key
+    wallet = Wallet(tdata.MINISCRIPT_KEY)
+    assert wallet.is_miniscript()
+
+    # Miniscript key with loaded descriptor
+    wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.is_miniscript()
+
+    # Taproot miniscript key with loaded descriptor
+    wallet = Wallet(tdata.TAP_MINISCRIPT_KEY)
+    wallet.load(tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.is_miniscript()
+
+    # No key and no descriptor
+    wallet = Wallet(None)
+    assert not wallet.is_miniscript()
+
+    # Non miniscript descriptors
+    wallet.load(tdata.SPECTER_MULTISIG_DESCRIPTOR, FORMAT_NONE)
+    assert not wallet.is_miniscript()
+
+    wallet = Wallet(None)
+    wallet.load(tdata.UNAMBIGUOUS_SINGLESIG_DESCRIPTOR, FORMAT_NONE)
+    assert not wallet.is_miniscript()
+
+    wallet = Wallet(None)
+    wallet.load(tdata.KRUX_TAPROOT1_DESCRIPTOR, FORMAT_NONE)
+    assert not wallet.is_miniscript()
+
+    # Miniscript descriptor
+    wallet = Wallet(None)
+    wallet.load(tdata.LIANA_MINISCRIPT_DESCRIPTOR, FORMAT_NONE)
+    assert wallet.is_miniscript()
 
 
 def test_is_loaded(mocker, m5stickv, tdata):
@@ -378,9 +496,10 @@ def test_wallet_qr(mocker, m5stickv, tdata):
 def test_receive_addresses(mocker, m5stickv, tdata):
     from krux.wallet import Wallet
     from krux.qr import FORMAT_PMOFN
+    from krux.key import TYPE_SINGLESIG
 
     cases = [
-        (
+        (  # Native Segwit
             tdata.SINGLESIG_KEY,
             tdata.SPECTER_SINGLESIG_WALLET_DATA,
             FORMAT_PMOFN,
@@ -397,7 +516,58 @@ def test_receive_addresses(mocker, m5stickv, tdata):
                 "bc1q6mlxs236fmyeteummv9x5pmxteh86lkln4emag",
             ],
         ),
-        (
+        (  # Legacy Single-sig
+            tdata.LEGACY1_KEY,
+            tdata.KRUX_LEGACY1_DESCRIPTOR,
+            FORMAT_PMOFN,
+            [
+                "1GsaC1sVGGnN7KpYCHUMR4Z8c9F3BzfUAL",
+                "1CSSWcbgAPNsB5twS2TfACtCqC6PfahgnM",
+                "1E9U3icgCLbDqEhS4xqtopvXYtRU4UmSoU",
+                "17mTKjHWb1LNKjEdUUmVXsDFUcEmqWzSw6",
+                "16Sg1PLRfEoGr2YsH93v3xAfXSTf42vcHi",
+                "13rNEribNgeARh7p58FXKJxSRYcVg3i5VJ",
+                "1Ler4fyDfDq23dMbJ1WXRoYr9EcL6QX8KN",
+                "15dihUfEHdC21UaJhneQFUfPywonD9ZuJe",
+                "1MSN9AjP8GourmFEmtqTjukqV9Jp2vzgVS",
+                "1CoSqz4K5xEysnBoPPLukp4gmh2dnx11Wj",
+            ],
+        ),
+        (  # Nested Segwit Single-sig
+            tdata.NESTEDSW1_KEY,
+            tdata.KRUX_NESTEDSW1_DESCRIPTOR,
+            FORMAT_PMOFN,
+            [
+                "3HN5XxXfK5kNNu83GSVc1tAu3CVpBjghcS",
+                "395RjbYLhWFWC2LarYkDk41BxxiBiJSWEb",
+                "3EuvWJNACMVswiczged3bHnWjywKA3n3WQ",
+                "3EZtai8s84WG8MvcUw3xnTHnWKiQUJBLr7",
+                "36eFaNxjFBTZUHFWHRcKacppmdFy4X1MKR",
+                "38p4zYbK1KC4KEkid1tVkHr2ruARTCKBJK",
+                "3P8PcnaFeHn8FCoFwoxPKFGCTzmxXnLJEx",
+                "33aw8rJwuxtexN8nZ6YiYvJSoNUAeaY8FM",
+                "35V6by4xd9owyHaZiBhueKCGMUecV9K4d8",
+                "33eCmbdSneaxYarxtX9mdJpvyoG1NWaKPj",
+            ],
+        ),
+        (  # Taproot Single-sig
+            tdata.TAPROOT1_KEY,
+            tdata.KRUX_TAPROOT1_DESCRIPTOR,
+            FORMAT_PMOFN,
+            [
+                "bc1pkusdqe839xltdn5jk62rv0cx6c4nrrw3hr8rmf3478tnn88qs2ls4g77cl",
+                "bc1pzlnrsqze6lwcl9w9z5n9x8dfejf47mrdhv5t8pp4gjehe535xftqkwp635",
+                "bc1pxz7j9cakl53a72hg08g0ug8gtsy9cf86fmh5mtjucyp707jm7mjsx8lagh",
+                "bc1p2aqrr4wctz0mhcnn4tpcrg0r89pnn7yqqnv8xpeqr3sckkp3s3fqnnpkgh",
+                "bc1p3tdqgfjk2zn88jshtj698vfphzn8t3lr4l6qhpf38yyvcpevkfeql3p2fs",
+                "bc1paa4rtwsdf7z9p22wassvhj6zk5zs94xp0rpcrq2452xwzmgejxpquat7gs",
+                "bc1p93pdqw9v2237pn2xzyks0dd3mnpnf0kagx0hl44u2msz23425w0s68s658",
+                "bc1pmejm3jyp6d287dn4lx68j966y0783rvwfujus8s3h9dmedfdm98s7xglv7",
+                "bc1p9dvlkmfzl8qmax47lg22rfluztc0ev7lvs3rl838y0s96p65mwusz08lhv",
+                "bc1p8fue49l0amhqvsau72gmk3dau2w5ktxkh2njck95rej0v538wj4q40gksu",
+            ],
+        ),
+        (  # Multisig WSH
             tdata.MULTISIG_KEY1,
             tdata.SPECTER_MULTISIG_WALLET_DATA,
             FORMAT_PMOFN,
@@ -414,10 +584,53 @@ def test_receive_addresses(mocker, m5stickv, tdata):
                 "bc1qgzqffn9f4fal2ld04wdafakvgrl5gexp744gm8eg58j7a633lf9slzcjup",
             ],
         ),
+        (  # Miniscript WSH
+            tdata.MINISCRIPT_KEY,
+            tdata.LIANA_MINISCRIPT_DESCRIPTOR,
+            FORMAT_PMOFN,
+            [
+                "bc1q3qp2kgjxkmh6dptyppvptjyg8wlvvddyec0cfgpwftn4nyjs8jpslyaynm",
+                "bc1qt2j45nvg7rup8h73t5syuaxuvzqr4wk3lqdpjw3ew2afdc7ggzlqspnqwj",
+                "bc1qvs22y63jdy0fdmgesht3yn3d7ruvuahf73yqmuhhx5w6trj6fy6syugd43",
+                "bc1qckd42m2mttn3gmz2my7c3flj9uujq0ekpkuxqjj2m2lnwgkrzwuqq8ke23",
+                "bc1qq4lhujwh4rhxmu82svy3cz97h7ays9j2wjmtw2ju8sqynx88pxys2fud4h",
+                "bc1q8jm9g8t96g8m75ce6uvq2lhp5snfnzmumdq3qh04v8jt5w7dlmvqfjs8f2",
+                "bc1qa8tc0pwljncccdauv37vka3kxfus9pssn62dwvvjjhye3h0egsjsj2eu27",
+                "bc1q5rehtcjd7xw9pfv72lnpv7rrtr4pjh93afr0y60hrluauzn2y83qc8p4fe",
+                "bc1qmz9v9z0acnd7qehmvqje2m7qmr9ytus87xyk8nprzkypg8gy4zksem4dfz",
+                "bc1qncuaqah98hypkxnpp465mqw7srjgm67s70gkzcs693kv9zp3dv8qa5w8fj",
+            ],
+        ),
+        (  # Miniscript TR
+            tdata.TAP_MINISCRIPT_KEY,
+            tdata.LIANA_TAPROOT_MINISCRIPT_DESCRIPTOR,
+            FORMAT_PMOFN,
+            [
+                "bc1pq87pvf85eu3stcxgemm2gppt5w99uxgm75fv3l62lnmjaewuaw0qjpeda6",
+                "bc1purr3u8x4j0ean426yf09ap2xu5xvehyrlh9s3uqxsf3e2w9pxkjsaf9pum",
+                "bc1pw83dp6vq7tn7965jxxavkd5fa04y8vpz9njtg7ms8ng9l3u0d0uqnqssfa",
+                "bc1pef8a3pmsdee6vlup2g3mg5903zxq5lykvpwm4v5f4z0swefdrswsle9sy8",
+                "bc1pfxmm35spmp9s9jstmvwd0vjksura79ez5f68q6c5gewh6q77jwqs7geafk",
+                "bc1pwwntw7cplgueq5kulek7mqqqr5s6uatd6psgnclp2a8c3rukxgzqmhszr7",
+                "bc1pc0m0kvav5sddu5a05chzqk9de9z324teh7cdtem9kly6snw8fz4qpp5uwu",
+                "bc1pedvnetmy08ekk9j3qyw3zussmxy0lc3tlzmvs9qmnxm9yqq827dqhzjv69",
+                "bc1p40d9u4g7wgnggrykeghztla4l78k38nkc3ekrghsp6evp2awj72slfa8qc",
+                "bc1pvpwmch3gjcrer395wzswawnfuer4crz7x6vt9g845jqklvgvydkq0hm8gj",
+            ],
+        ),
     ]
 
     for case in cases:
         wallet = Wallet(case[0])
+        # Check addresses before descriptor is loadaded in case it is single-sig
+        if wallet.key.policy_type == TYPE_SINGLESIG:
+            assert [addr for addr in wallet.obtain_addresses(0, limit=10)] == case[3]
+        else:
+            # Ensure an error is raised as the descriptor is not loaded
+            with pytest.raises(ValueError):
+                [addr for addr in wallet.obtain_addresses(0, limit=10)]
+
+        # Check addresses after descriptor is loaded
         wallet.load(case[1], case[2])
         assert [addr for addr in wallet.obtain_addresses(0, limit=10)] == case[3]
 

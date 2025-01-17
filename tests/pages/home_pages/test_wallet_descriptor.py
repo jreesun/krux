@@ -18,7 +18,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_PAGE],
         ),
-        # 1 Load, from camera, good data, accept
+        # 1 Load, from camera, good data - accept
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -74,7 +74,7 @@ def test_wallet(mocker, m5stickv, tdata):
             tdata.MULTISIG_12_WORD_KEY,
             tdata.SPECTER_MULTISIG_WALLET_DATA,
             None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [BUTTON_ENTER],
         ),
         # 9 vague BlueWallet-ish p2pkh, requires allow_assumption
         (
@@ -154,6 +154,7 @@ def test_wallet(mocker, m5stickv, tdata):
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
+        mocker.spy(wallet_descriptor, "display_loading_wallet")
         mocker.spy(wallet_descriptor, "display_wallet")
 
         # Mock SD card descriptor loading
@@ -164,15 +165,16 @@ def test_wallet(mocker, m5stickv, tdata):
         wallet_descriptor.wallet()
 
         if case[0]:
+            # If wallet is already loaded
             wallet_descriptor.display_wallet.assert_called_once()
         else:
             # If accepted the message and choose to load from camera
             if case[4][:2] == [BUTTON_ENTER, BUTTON_ENTER]:
                 qr_capturer.assert_called_once()
                 if case[2] is not None and case[2] != "{}":
-                    wallet_descriptor.display_wallet.assert_called_once()
+                    wallet_descriptor.display_loading_wallet.assert_called_once()
             # If accepted the message and choose to load from SD
             elif case[4][:3] == [BUTTON_ENTER, BUTTON_PAGE, BUTTON_ENTER]:
                 if case[2] is not None and case[2] != "{}":
-                    wallet_descriptor.display_wallet.assert_called_once()
+                    wallet_descriptor.display_loading_wallet.assert_called_once()
         assert ctx.input.wait_for_button.call_count == len(case[4])

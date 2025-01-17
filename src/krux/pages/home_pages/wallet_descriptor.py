@@ -26,12 +26,12 @@ from .. import (
     LOAD_FROM_CAMERA,
     LOAD_FROM_SD,
 )
-from ...display import DEFAULT_PADDING, BOTTOM_PROMPT_LINE
+from ...display import DEFAULT_PADDING, BOTTOM_PROMPT_LINE, FONT_HEIGHT, FONT_WIDTH
 from ...krux_settings import t
 from ...qr import FORMAT_NONE
 from ...sd_card import DESCRIPTOR_FILE_EXTENSION, JSON_FILE_EXTENSION
 from ...themes import theme
-from ...key import FINGERPRINT_SYMBOL
+from ...key import FINGERPRINT_SYMBOL, DERIVATION_PATH_SYMBOL, P2TR
 
 
 class WalletDescriptor(Page):
@@ -106,6 +106,8 @@ class WalletDescriptor(Page):
         else:  # Cancel
             return MENU_CONTINUE
 
+        self.ctx.display.clear()
+        self.ctx.display.draw_centered_text(t("Processing.."))
         if wallet_data is None:
             # Camera or SD card loading failed!
             self.flash_error(t("Failed to load"))
@@ -138,67 +140,154 @@ class WalletDescriptor(Page):
 
         if wallet.is_loaded():
             self.ctx.display.clear()
-            self.display_wallet(wallet, is_loading=True)
+            self.display_loading_wallet(wallet)
             if self.prompt(t("Load?"), BOTTOM_PROMPT_LINE):
                 self.ctx.wallet = wallet
                 self.flash_text(t("Wallet output descriptor loaded!"))
 
         return MENU_CONTINUE
 
-    def display_wallet(self, wallet, is_loading=False):
-        """Displays a wallet, including its label and abbreviated xpubs.
-        If include_qr is True, a QR code of the wallet will be shown
-        which will contain the same data as was originally loaded, in
-        the same QR format
-        """
-        import binascii
-
-        about = [wallet.label]
-        fingerprints = []
-        for i, key in enumerate(wallet.descriptor.keys):
-            label = str(i + 1) + ". " if wallet.is_multisig() else ""
-            fingerprints.append(
-                label
-                + FINGERPRINT_SYMBOL
-                + " "
-                + (
-                    binascii.hexlify(key.origin.fingerprint).decode()
-                    if key.origin
-                    else t("unknown")
-                )
-            )
-        about.extend(fingerprints)
-        if not wallet.is_multisig() and not wallet.is_miniscript():
-            about.append(self.fit_to_line(str(wallet.descriptor.keys[0].key)))
-            if is_loading:
-                self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
-            else:
-                wallet_data, qr_format = wallet.wallet_qr()
-                self.display_qr_codes(wallet_data, qr_format, title=about)
-        else:
-            # Display fingerprints
-            self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
-            self.ctx.input.wait_for_button()
-
-            # Display XPUBs
-            about = [wallet.label]
-            xpubs = []
-            for i, xpub in enumerate(wallet.policy["cosigners"]):
-                xpubs.append(self.fit_to_line(xpub, str(i + 1) + ". "))
-            about.extend(xpubs)
+    def display_wallet(self, wallet):
+        """Try to show the wallet output descriptor as a QRCode"""
+        try:
+            wallet_data, qr_format = wallet.wallet_qr()
+            self.display_qr_codes(wallet_data, qr_format, title=wallet.label)
+        except Exception as e:
             self.ctx.display.clear()
-            self.ctx.display.draw_hcentered_text(about, offset_y=DEFAULT_PADDING)
-            if is_loading:
-                # Skip the QR code if we're loading the wallet
-                return
+            self.ctx.display.draw_centered_text(
+                t("Error:") + "\n%s" % repr(e), theme.error_color
+            )
             self.ctx.input.wait_for_button()
-            # Try to show the wallet output descriptor as a QRCode
-            try:
-                wallet_data, qr_format = wallet.wallet_qr()
-                self.display_qr_codes(wallet_data, qr_format, title=wallet.label)
-            except Exception as e:
-                self.ctx.display.clear()
-                self.ctx.display.draw_centered_text(
-                    t("Error:") + "\n%s" % repr(e), theme.error_color
+
+    def display_loading_wallet(self, wallet):
+        """Displays wallet descriptor attrbutes while loading"""
+
+        offset_y = DEFAULT_PADDING
+        self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
+        offset_y += (3 * FONT_HEIGHT) // 2
+        our_key_indexes_chars = []
+        unused_key_index = None
+        for i, key in enumerate(wallet.descriptor.keys):
+            label_color = theme.fg_color
+            if wallet.is_multisig() or wallet.is_miniscript():
+                label = chr(65 + i) + ": "
+            else:
+                label = " " * 3
+            key_fingerprint = FINGERPRINT_SYMBOL + " "
+            if key.origin:
+                key_origin_str = str(key.origin)
+                key_fingerprint += key_origin_str[:8]
+            else:
+                if (
+                    i == 0
+                    and wallet.is_miniscript()
+                    and wallet.policy.get("type") == P2TR
+                ):
+                    key_fingerprint = t("TR internal key")
+                    label_color = theme.disabled_color
+                    unused_key_index = chr(65 + i)
+                else:
+                    key_fingerprint += t("unknown")
+            #  Check if the key is the one loaded in the wallet
+            if (
+                self.ctx.wallet.key
+                and len(wallet.descriptor.keys) > 1
+                and key.fingerprint == self.ctx.wallet.key.fingerprint
+            ):
+                label_color = theme.highlight_color
+                our_key_indexes_chars.append(chr(65 + i))
+            self.ctx.display.draw_string(
+                DEFAULT_PADDING,
+                offset_y,
+                label + key_fingerprint,
+                label_color,
+            )
+            offset_y += FONT_HEIGHT
+            if key.origin:
+                key_derivation_str = DERIVATION_PATH_SYMBOL
+                key_derivation_str += " m"
+                key_derivation_str += key_origin_str[8:].replace("h", "'")
+                self.ctx.display.draw_string(
+                    DEFAULT_PADDING + 3 * FONT_WIDTH,
+                    offset_y,
+                    key_derivation_str,
+                    label_color,
                 )
+            elif (
+                i == 0 and wallet.is_miniscript() and wallet.policy.get("type") == P2TR
+            ):
+                self.ctx.display.draw_string(
+                    DEFAULT_PADDING + 3 * FONT_WIDTH,
+                    offset_y,
+                    t("Provably unspendable"),
+                    label_color,
+                )
+            offset_y += FONT_HEIGHT
+            self.ctx.display.draw_hcentered_text(
+                self.fit_to_line(key.key.to_base58(), " " * 3),
+                offset_y,
+                label_color,
+            )
+            offset_y += (FONT_HEIGHT * 3) // 2
+
+            # Checks if there's another key and room for it
+            if (
+                i + 1 < len(wallet.descriptor.keys)
+                and offset_y + (FONT_HEIGHT * 4) > self.ctx.display.height()
+            ):
+                # If there's no room for another key, create a new page
                 self.ctx.input.wait_for_button()
+                self.ctx.display.clear()
+                offset_y = DEFAULT_PADDING
+                self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
+                offset_y += (3 * FONT_HEIGHT) // 2
+
+        # Display miniscrip policies
+        if wallet.is_miniscript():
+            from .miniscript_indenter import MiniScriptIndenter
+
+            miniscript_policy = MiniScriptIndenter().indent(
+                wallet.descriptor.full_policy
+            )
+            # miniscript_policy = self.ctx.display.to_lines(wallet.descriptor.full_policy)
+            lines_left = (BOTTOM_PROMPT_LINE - offset_y) // FONT_HEIGHT
+            if len(miniscript_policy) > lines_left:
+                # If there's no room for the policy, create a new page
+                self.ctx.input.wait_for_button()
+                self.ctx.display.clear()
+                offset_y = DEFAULT_PADDING
+                self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
+                offset_y += (3 * FONT_HEIGHT) // 2
+
+            for line in miniscript_policy:
+                self.ctx.display.draw_string(
+                    DEFAULT_PADDING,
+                    offset_y,
+                    line,
+                )
+                for i, char in enumerate(line):
+                    if char == unused_key_index:
+                        self.ctx.display.draw_string(
+                            DEFAULT_PADDING + i * FONT_WIDTH,
+                            offset_y,
+                            char,
+                            theme.disabled_color,
+                        )
+                    elif char in our_key_indexes_chars:
+                        self.ctx.display.draw_string(
+                            DEFAULT_PADDING + i * FONT_WIDTH,
+                            offset_y,
+                            char,
+                            theme.highlight_color,
+                        )
+                offset_y += FONT_HEIGHT
+                if offset_y > BOTTOM_PROMPT_LINE:
+                    # If there's no room for another line, create a new page
+                    self.ctx.display.draw_hcentered_text("...", offset_y)
+                    self.ctx.input.wait_for_button()
+                    self.ctx.display.clear()
+                    offset_y = DEFAULT_PADDING
+                    self.ctx.display.draw_hcentered_text(wallet.label, offset_y)
+                    offset_y += FONT_HEIGHT
+                    self.ctx.display.draw_hcentered_text("...", offset_y)
+                    offset_y += FONT_HEIGHT

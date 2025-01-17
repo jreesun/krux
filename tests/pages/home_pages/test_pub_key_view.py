@@ -79,7 +79,6 @@ def test_public_key(mocker, m5stickv, tdata):
         pub_key_viewer.public_key()
 
         version = "Zpub" if ctx.wallet.key.policy_type == TYPE_MULTISIG else "zpub"
-        print(ctx.key.policy_type, version)
         qr_view_calls = []
         print_qr_calls = []
 

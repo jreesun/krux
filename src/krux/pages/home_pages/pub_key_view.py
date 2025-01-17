@@ -102,7 +102,7 @@ class PubkeyView(Page):
             versions.append(self.ctx.wallet.key.network["ypub"])
         elif self.ctx.wallet.key.script_type == P2SH_P2WSH:
             versions.append(self.ctx.wallet.key.network["Ypub"])
-        elif self.ctx.wallet.key.script_type == P2WSH:
+        elif self.ctx.wallet.key.script_type == P2WSH and self.ctx.wallet.is_multisig():
             versions.append(self.ctx.wallet.key.network["Zpub"])
         pub_key_menu_items = []
         for version in versions:

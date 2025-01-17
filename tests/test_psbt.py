@@ -61,10 +61,10 @@ def tdata(mocker):
     P2TR_PSBT_B64 = "cHNidP8BAKgCAAAAAfn+phUWoAfkdjJXSEFxjcDaXBr22RczfwaOVNq+Sb4/AAAAAAD9////AzoeAAAAAAAAIlEgdeZfiD3lhycx2Y6ob18IYvCSOdDpsA9J9ZIGnBhNAqLoAwAAAAAAACJRIJ0tm23mDNzdWQfBwJYxSRvdQ07uqoqvOzvxnWPVPkCZ6AMAAAAAAAAWABSuzR7cPv9lqiCdAhXnPXCQXcFobIO/KwBPAQQ1h88D4BfRu4AAAAABg1wLUSGDdsYUVUKKn0e/zOH2zoOX6tewA4fp2epWgwLPvXEAMR4OhYRMNzhygxQ5TrgwKmtQcNaS5BsUuoGAkBBzxdoKVgAAgAEAAIAAAACAAAEBK38nAAAAAAAAIlEgBqyC/Dbbtg1IeR2Bw8HrOX+pc+RWyMb7VMEEIR8EexoBAwQAAAAAIRZFxrHkNII86ea0SPvB5AUnIDg6DSEogry6dlNNd1KKrRkAc8XaClYAAIABAACAAAAAgAAAAAAJAAAAARcgRcax5DSCPOnmtEj7weQFJyA4Og0hKIK8unZTTXdSiq0AIQcg65BQBosBO949IE21msXbKhx4qKolBz+/LnrUnQUVxhkAc8XaClYAAIABAACAAAAAgAEAAAABAAAAAQUgIOuQUAaLATvePSBNtZrF2yoceKiqJQc/vy561J0FFcYAIQfcq45CM9kU8pgInl2NOydhigf1IT+Jmiu9unj9uQLFzxkAc8XaClYAAIABAACAAAAAgAAAAAAKAAAAAQUg3KuOQjPZFPKYCJ5djTsnYYoH9SE/iZorvbp4/bkCxc8AAA=="
     P2TR_PSBT_UR_PSBT = UR("crypto-psbt", PSBT(P2TR_PSBT).to_cbor())
 
-    SIGNED_P2TR_PSBT = b'psbt\xff\x01\x00\xa8\x02\x00\x00\x00\x01\xf9\xfe\xa6\x15\x16\xa0\x07\xe4v2WHAq\x8d\xc0\xda\\\x1a\xf6\xd9\x173\x7f\x06\x8eT\xda\xbeI\xbe?\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03:\x1e\x00\x00\x00\x00\x00\x00"Q u\xe6_\x88=\xe5\x87\'1\xd9\x8e\xa8o_\x08b\xf0\x929\xd0\xe9\xb0\x0fI\xf5\x92\x06\x9c\x18M\x02\xa2\xe8\x03\x00\x00\x00\x00\x00\x00"Q \x9d-\x9bm\xe6\x0c\xdc\xddY\x07\xc1\xc0\x961I\x1b\xddCN\xee\xaa\x8a\xaf;;\xf1\x9dc\xd5>@\x99\xe8\x03\x00\x00\x00\x00\x00\x00\x16\x00\x14\xae\xcd\x1e\xdc>\xffe\xaa \x9d\x02\x15\xe7=p\x90]\xc1hl\x83\xbf+\x00\x00\x01\x01+\x7f\'\x00\x00\x00\x00\x00\x00"Q \x06\xac\x82\xfc6\xdb\xb6\rHy\x1d\x81\xc3\xc1\xeb9\x7f\xa9s\xe4V\xc8\xc6\xfbT\xc1\x04!\x1f\x04{\x1a\x01\x08B\x01@(\xb0\x7f\x8d\x19\x9a\xa5\xa3\xae_ ti\x10G\x95\xc3)\x18\x1e\xca=Lq^\x9ah\xe7\xb58=\x87\x80\xd8\x1a\xbd\x0bb\x06@}\xd2\x0c?\xd9G\xac\xe9!%{\xe0E\x8bY\xca\xedH\xebh`\xbc\xbb\x13\x00\x00\x00\x00'
-    SIGNED_P2TR_PSBT_B43 = "1.W6Z+4SFE49JJT-J.9MUIM8BKT/3M25COGC72:/-9L4Z*6IXB2KK$H2IC/44*CKWH2801.OB1F+5M*MTBOXC8*$8NXVL40OY41IL*F5QJ1AT4ZL4G8J.8X7IFBM-:XE+QQOY*4ODVY-67NBDJ.ZKY:KQ1S3O.ZJV*14GS7Z/KU+.9G8SBDR1NWSCJWD*7$/63DQ+ZW$4BU7.00/QBF$VXSTW0A9LK52C7RBVSQ4+S4+HSC2159G:4HJ8+QWX-DU.LK43L-7CHLHHKWRL/7ZK8S.A-T578YCDHTCH5O/3N/96SV$5ADQ+S82KECF-T7868W*INCWZ3U4G$V8$ON-/KWV3Z+4N37DNH.8U:-9:KJ5WW*7U67S-0V9K3T:GO19R-/Z*XBW$N9OE7P.I912.1JN+EM5KJXR*2NAB/WON6RP03U6YIP0C"
-    SIGNED_P2TR_PSBT_B58 = "297QokMrvCwY2Pjf3b1GUWQsM8EhryP2qMWTDeTDRo6WNptEQH54WkFSybF6uYEbxSJja2nwMM9mHqEbtkxYqriFdRs7fvU2tEHXK2Hx2Xycz7AEx2LRvADfUGtycCxvVV155wRPwruzecqi5pTAbYnh8Ds5pznRzTkgcnCVaoJbLvmjbE7b6BkWiY5LEYUvZ1wBdzaVhewCS32CXfQ516AC1Ky4G7Xf1rvoQeAdfoD4YV13zV8ifoWWz6A9avCZMREzXartA7igxQZSwZS3o36yrr6MTkfKgqRYs46fHNKud78PUugnEA3kDDKrTRUhioptPQ52hFrN6iswVE2EuHGttaFKZmtQa6Z2gBDrydus7iwrqx14EdzSVzKmY54AHWn23u6u9F1StHsW3sj7m"
-    SIGNED_P2TR_PSBT_B64 = "cHNidP8BAKgCAAAAAfn+phUWoAfkdjJXSEFxjcDaXBr22RczfwaOVNq+Sb4/AAAAAAD9////AzoeAAAAAAAAIlEgdeZfiD3lhycx2Y6ob18IYvCSOdDpsA9J9ZIGnBhNAqLoAwAAAAAAACJRIJ0tm23mDNzdWQfBwJYxSRvdQ07uqoqvOzvxnWPVPkCZ6AMAAAAAAAAWABSuzR7cPv9lqiCdAhXnPXCQXcFobIO/KwAAAQErfycAAAAAAAAiUSAGrIL8Ntu2DUh5HYHDwes5f6lz5FbIxvtUwQQhHwR7GgEIQgFAKLB/jRmapaOuXyB0aRBHlcMpGB7KPUxxXppo57U4PYeA2Bq9C2IGQH3SDD/ZR6zpISV74EWLWcrtSOtoYLy7EwAAAAA="
+    SIGNED_P2TR_PSBT = b'psbt\xff\x01\x00\xa8\x02\x00\x00\x00\x01\xf9\xfe\xa6\x15\x16\xa0\x07\xe4v2WHAq\x8d\xc0\xda\\\x1a\xf6\xd9\x173\x7f\x06\x8eT\xda\xbeI\xbe?\x00\x00\x00\x00\x00\xfd\xff\xff\xff\x03:\x1e\x00\x00\x00\x00\x00\x00"Q u\xe6_\x88=\xe5\x87\'1\xd9\x8e\xa8o_\x08b\xf0\x929\xd0\xe9\xb0\x0fI\xf5\x92\x06\x9c\x18M\x02\xa2\xe8\x03\x00\x00\x00\x00\x00\x00"Q \x9d-\x9bm\xe6\x0c\xdc\xddY\x07\xc1\xc0\x961I\x1b\xddCN\xee\xaa\x8a\xaf;;\xf1\x9dc\xd5>@\x99\xe8\x03\x00\x00\x00\x00\x00\x00\x16\x00\x14\xae\xcd\x1e\xdc>\xffe\xaa \x9d\x02\x15\xe7=p\x90]\xc1hl\x83\xbf+\x00\x00\x01\x01+\x7f\'\x00\x00\x00\x00\x00\x00"Q \x06\xac\x82\xfc6\xdb\xb6\rHy\x1d\x81\xc3\xc1\xeb9\x7f\xa9s\xe4V\xc8\xc6\xfbT\xc1\x04!\x1f\x04{\x1a\x01\x08B\x01@(\xb0\x7f\x8d\x19\x9a\xa5\xa3\xae_ ti\x10G\x95\xc3)\x18\x1e\xca=Lq^\x9ah\xe7\xb58=\x87\x80\xd8\x1a\xbd\x0bb\x06@}\xd2\x0c?\xd9G\xac\xe9!%{\xe0E\x8bY\xca\xedH\xebh`\xbc\xbb\x13\x01\x13@(\xb0\x7f\x8d\x19\x9a\xa5\xa3\xae_ ti\x10G\x95\xc3)\x18\x1e\xca=Lq^\x9ah\xe7\xb58=\x87\x80\xd8\x1a\xbd\x0bb\x06@}\xd2\x0c?\xd9G\xac\xe9!%{\xe0E\x8bY\xca\xedH\xebh`\xbc\xbb\x13\x00\x00\x00\x00'
+    SIGNED_P2TR_PSBT_B43 = "$JBJ$DT-D-U/1AEWDTQ*PH4J+H:1+I467L27$UINP.QOHP:ZYLDCPD8/LI+DN/A.X7-PC4UCX-K$/OQO-G-H.CGX.+9:5JKUVI:PVG+C37HW*MVZDUS$J-CLTWQ6WQ.A0MGXBUZF:X:276$9AZTBLV82BDNXAV1XQ6..R3I+.LV4OLAXU0MO:KY3KB.:-2PFJOYQ/*95CD:5HPWA/HJ2OW1ZPNB*S39+EAP+60B73/9W9KU.A:DTLVNCOCV1/BBLE9O14Z5ACDF0N$PHZ-B:IEJHV17V91KA/WPGFPSZNSIB/-WNYY./+5VQV.DUAIILF88LFSGJ/E36.B6WJ1$I/FWPOI/L*3.8F2B1TNQS-24N8QJAF**+S13/RFDR9ZZ3/N4CP7S9Y9HKJ-$/B43SC*+BRP44+DUH+$79DJB1-9AY7N/SZPZSHJP6+KYW+4/GIWNVRW$DUE08UMY-7/FH3*ZPPAL2PWR$1+R996Y.E9H:PIB*SJQY.JOEQL/X+2Q5V91UL*/WNCH$$DY*GK.I9XN"
+    SIGNED_P2TR_PSBT_B58 = "9eehoGbwQ78EoHBL2mrxCSrMophCYTK9PxBW3WqL69ZFwj5F1ESdYXt9GdSKA3xxCgfDKhQt9PqBtSkNoKRFgnm6WyTASro6r5za7Nd2JtywPgYe1JdErssp47WvjrbkBBYV5jvWrzPTJhFrpyis8LLyKExp1XY4VwfSTrcFXfDEM7QoRDehks7s7w7CbLHg8zJEDqRjCdcZpzbVunb3FR7ypZHv41S8VKvhiGHFq1nW99F3dErPYbEs8Pc7gVwhJ6XuhmkpHArZp8pyFd3pQJhyBYQwqUR4QU41buYuFQ465SyMuCLyXhcevALrcjJRJVJsCpsEEZgqTk5z2oqsNPXNVHweNjeHBUdN9uJBgtQ6v5mVWRdsYUfmwFeQqyvDEaioqAnNNSpSe2ByNfcv8ftSfzocbNHLahUqTbjSvxThW84LpEwMUitaUQoguJweVscdRRitkx1kCmsaMC5JwrRH13zHVoFnJqPEUHZwqYTzAJCf"
+    SIGNED_P2TR_PSBT_B64 = "cHNidP8BAKgCAAAAAfn+phUWoAfkdjJXSEFxjcDaXBr22RczfwaOVNq+Sb4/AAAAAAD9////AzoeAAAAAAAAIlEgdeZfiD3lhycx2Y6ob18IYvCSOdDpsA9J9ZIGnBhNAqLoAwAAAAAAACJRIJ0tm23mDNzdWQfBwJYxSRvdQ07uqoqvOzvxnWPVPkCZ6AMAAAAAAAAWABSuzR7cPv9lqiCdAhXnPXCQXcFobIO/KwAAAQErfycAAAAAAAAiUSAGrIL8Ntu2DUh5HYHDwes5f6lz5FbIxvtUwQQhHwR7GgEIQgFAKLB/jRmapaOuXyB0aRBHlcMpGB7KPUxxXppo57U4PYeA2Bq9C2IGQH3SDD/ZR6zpISV74EWLWcrtSOtoYLy7EwETQCiwf40ZmqWjrl8gdGkQR5XDKRgeyj1McV6aaOe1OD2HgNgavQtiBkB90gw/2Ues6SEle+BFi1nK7UjraGC8uxMAAAAA"
     SIGNED_P2TR_PSBT_UR_PSBT = UR("crypto-psbt", PSBT(SIGNED_P2TR_PSBT).to_cbor())
 
     # Native Segwit Multisig
@@ -236,11 +236,11 @@ def tdata(mocker):
 def test_init_singlesig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR, FORMAT_BBQR
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
     cases = [
         (tdata.P2PKH_PSBT, FORMAT_NONE),
         (tdata.P2PKH_PSBT_B43, FORMAT_PMOFN),
@@ -273,11 +273,11 @@ def test_init_singlesig(mocker, m5stickv, tdata):
 def test_init_singlesig_from_sdcard(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
     cases = [
         (tdata.P2PKH_PSBT, FORMAT_NONE),
         (tdata.P2WPKH_PSBT, FORMAT_NONE),
@@ -294,11 +294,11 @@ def test_init_singlesig_from_sdcard(mocker, m5stickv, tdata):
 def test_init_empty_file_from_sdcard(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
     mocker.patch("builtins.open", mock_open(MockFile()))
     with pytest.raises(ValueError):
         PSBTSigner(wallet, None, FORMAT_NONE, "dummy.psbt")
@@ -307,11 +307,11 @@ def test_init_empty_file_from_sdcard(mocker, m5stickv, tdata):
 def test_init_multisig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_MULTISIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MULTISIG, NETWORKS["test"]))
     cases = [
         (tdata.P2WSH_PSBT, FORMAT_NONE),
         (tdata.P2WSH_PSBT_B43, FORMAT_PMOFN),
@@ -333,11 +333,11 @@ def test_init_multisig(mocker, m5stickv, tdata):
 def test_init_multisig_from_sdcard(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_MULTISIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MULTISIG, NETWORKS["test"]))
     cases = [
         (tdata.P2WSH_PSBT, FORMAT_NONE),
         (tdata.P2SH_P2WSH_PSBT, FORMAT_NONE),
@@ -354,11 +354,11 @@ def test_init_fails_on_invalid_psbt(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from ur.ur import UR
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_UR
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
 
     cases = [
         ("thisisnotavalidpsbt", FORMAT_NONE),
@@ -373,11 +373,11 @@ def test_init_fails_on_invalid_psbt_from_sdcard(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from ur.ur import UR
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
-    from krux.qr import FORMAT_NONE, FORMAT_UR
+    from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
 
     mock_file = MockFile("thisisnotavalidpsbt")
     mocker.patch("builtins.open", return_value=mock_file)
@@ -388,11 +388,11 @@ def test_init_fails_on_invalid_psbt_from_sdcard(mocker, m5stickv, tdata):
 def test_sign_singlesig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR, FORMAT_BBQR
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
     cases = [
         (tdata.P2PKH_PSBT, FORMAT_NONE, tdata.SIGNED_P2PKH_PSBT),
         (tdata.P2PKH_PSBT_B43, FORMAT_PMOFN, tdata.SIGNED_P2PKH_PSBT_B43),
@@ -440,11 +440,11 @@ def test_sign_singlesig(mocker, m5stickv, tdata):
 def test_sign_singlesig_from_sdcard(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
     cases = [
         (tdata.P2PKH_PSBT, FORMAT_NONE, tdata.SIGNED_P2PKH_PSBT),
         (tdata.P2PKH_PSBT_B64, FORMAT_NONE, tdata.SIGNED_P2PKH_PSBT_B64),
@@ -480,11 +480,11 @@ def test_sign_singlesig_from_sdcard(mocker, m5stickv, tdata):
 def test_sign_multisig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_MULTISIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MULTISIG, NETWORKS["test"]))
     cases = [
         (tdata.P2WSH_PSBT, FORMAT_NONE, tdata.SIGNED_P2WSH_PSBT),
         (tdata.P2WSH_PSBT_B43, FORMAT_PMOFN, tdata.SIGNED_P2WSH_PSBT_B43),
@@ -513,11 +513,11 @@ def test_sign_multisig(mocker, m5stickv, tdata):
 def test_sign_multisig_from_sdcard(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_MULTISIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE, FORMAT_PMOFN, FORMAT_UR
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MULTISIG, NETWORKS["test"]))
     cases = [
         (tdata.P2WSH_PSBT, FORMAT_NONE, tdata.SIGNED_P2WSH_PSBT),
         (tdata.P2SH_P2WSH_PSBT, FORMAT_NONE, tdata.SIGNED_P2SH_P2WSH_PSBT),
@@ -536,11 +536,11 @@ def test_sign_multisig_from_sdcard(mocker, m5stickv, tdata):
 def test_sign_fails_with_0_sigs_added(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_MULTISIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MULTISIG, NETWORKS["test"]))
     signer = PSBTSigner(wallet, tdata.P2WSH_PSBT, FORMAT_NONE)
     mocker.patch.object(signer.psbt, "sign_with", mocker.MagicMock(return_value=0))
 
@@ -552,11 +552,10 @@ def test_sign_fails_with_0_sigs_added(mocker, m5stickv, tdata):
 def test_outputs_singlesig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG, P2PKH, P2WPKH, P2SH_P2WPKH, P2TR
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"]))
     cases = [
         (
             tdata.P2PKH_PSBT,
@@ -564,6 +563,14 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
                 "Inputs (3): ₿ 0.00 001 856\n\nSpend (1): ₿ 0.00 001 000\n\nFee: ₿ 0.00 000 856 (85.6%) ~1.8 sat/vB",
                 "1. Spend: \n\ntb1q4mx3ahp7laj65gyaqg27w0tsjpwuz6rvaxx3tl\n\n₿ 0.00 001 000",
             ],
+            Wallet(
+                Key(
+                    tdata.TEST_MNEMONIC,
+                    TYPE_SINGLESIG,
+                    NETWORKS["test"],
+                    script_type=P2PKH,
+                )
+            ),
         ),
         (
             tdata.P2WPKH_PSBT,
@@ -572,6 +579,14 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
                 "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10 000 000",
                 "1. Change: \n\ntb1q9u62588spffmq4dzjxsr5l297znf3z6j5p2688\n\n₿ 0.89 997 180",
             ],
+            Wallet(
+                Key(
+                    tdata.TEST_MNEMONIC,
+                    TYPE_SINGLESIG,
+                    NETWORKS["test"],
+                    script_type=P2WPKH,
+                )
+            ),
         ),
         (
             tdata.P2SH_P2WPKH_PSBT,
@@ -580,6 +595,14 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
                 "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10 000 000",
                 "1. Change: \n\n2MvdUi5o3f2tnEFh9yGvta6FzptTZtkPJC8\n\n₿ 0.89 996 700",
             ],
+            Wallet(
+                Key(
+                    tdata.TEST_MNEMONIC,
+                    TYPE_SINGLESIG,
+                    NETWORKS["test"],
+                    script_type=P2SH_P2WPKH,
+                )
+            ),
         ),
         (
             tdata.P2TR_PSBT,
@@ -589,23 +612,32 @@ def test_outputs_singlesig(mocker, m5stickv, tdata):
                 "1. Self-transfer: \n\ntb1pn5kekm0xpnwd6kg8c8qfvv2fr0w5xnhw42927wem7xwk84f7gzvsvctkhp\n\n₿ 0.00 001 000",
                 "1. Change: \n\ntb1pwhn9lzpaukrjwvwe365x7hcgvtcfywwsaxcq7j04jgrfcxzdq23qhzr7wt\n\n₿ 0.00 007 738",
             ],
+            Wallet(
+                Key(
+                    tdata.TEST_MNEMONIC,
+                    TYPE_SINGLESIG,
+                    NETWORKS["test"],
+                    script_type=P2TR,
+                )
+            ),
         ),
     ]
-
+    case_num = 0
     for case in cases:
-        signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
+        print("test_outputs_singlesig case: ", case_num)
+        signer = PSBTSigner(case[2], case[0], FORMAT_NONE)
         outputs, _ = signer.outputs()
         assert outputs == case[1]
+        case_num += 1
 
 
 def test_outputs_multisig(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_MULTISIG, P2WSH, P2SH_P2WSH
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
     cases = [
         (
             tdata.P2WSH_PSBT,
@@ -614,6 +646,14 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
                 "1. Spend: \n\ntb1q35pg2rdt3p0v27dmdh9st43q8vzl29cps6kt3yradnqmg55eahfqfgn83n\n\n₿ 0.18 993 880",
                 "1. Change: \n\ntb1q4xgr8suxvgenukgf4c7r6qaawxxmy9zelh24q8hg5pfxzn2ekn3qfw808t\n\n₿ 0.01 000 000",
             ],
+            Wallet(
+                Key(
+                    tdata.TEST_MNEMONIC,
+                    TYPE_MULTISIG,
+                    NETWORKS["test"],
+                    script_type=P2WSH,
+                )
+            ),
         ),
         (
             tdata.P2SH_P2WSH_PSBT,
@@ -622,11 +662,20 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
                 "1. Spend: \n\ntb1que40al7rsw88ru9z0vr78vqwme4w3ctqj694kx\n\n₿ 0.10 000 000",
                 "1. Change: \n\n2N3vYfcg14Axr4NN33ADUorE2kEGEchFJpC\n\n₿ 0.89 995 740",
             ],
+            Wallet(
+                Key(
+                    tdata.TEST_MNEMONIC,
+                    TYPE_MULTISIG,
+                    NETWORKS["test"],
+                    script_type=P2SH_P2WSH,
+                )
+            ),
+            # TODO: Add a descriptor so change can be deteted
         ),
     ]
 
     for case in cases:
-        signer = PSBTSigner(wallet, case[0], FORMAT_NONE)
+        signer = PSBTSigner(case[2], case[0], FORMAT_NONE)
         outputs, _ = signer.outputs()
         assert outputs == case[1]
 
@@ -634,11 +683,11 @@ def test_outputs_multisig(mocker, m5stickv, tdata):
 def test_xpubs_fails_with_no_xpubs(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_MULTISIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
 
-    wallet = Wallet(Key(tdata.TEST_MNEMONIC, True, NETWORKS["test"]))
+    wallet = Wallet(Key(tdata.TEST_MNEMONIC, TYPE_MULTISIG, NETWORKS["test"]))
 
     with pytest.raises(ValueError):
         signer = PSBTSigner(wallet, tdata.MISSING_GLOBAL_XPUBS_PSBT, FORMAT_NONE)
@@ -648,7 +697,7 @@ def test_xpubs_fails_with_no_xpubs(mocker, m5stickv, tdata):
 def test_sign_single_1_input_1_output_no_change(m5stickv):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_PMOFN
 
@@ -659,7 +708,7 @@ def test_sign_single_1_input_1_output_no_change(m5stickv):
         "1. Spend: \n\n2MwEP7AfPt8NC65ACmcUhUtDZgGSxYiWUy4\n\n₿ 0.00 006 000",
     ]
 
-    wallet = Wallet(Key(MNEMONIC, False, NETWORKS["test"]))
+    wallet = Wallet(Key(MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
     signer = PSBTSigner(wallet, PSBT_B64, FORMAT_PMOFN)
     outputs, _ = signer.outputs()
     assert outputs == OUTPUT
@@ -668,7 +717,7 @@ def test_sign_single_1_input_1_output_no_change(m5stickv):
 def test_path_mismatch(mocker, m5stickv, tdata):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key, P2PKH, P2WPKH, P2SH_P2WPKH, P2TR, P2WSH
+    from krux.key import Key, P2WPKH, P2SH_P2WPKH, P2TR, TYPE_SINGLESIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_NONE
 
@@ -733,11 +782,16 @@ def test_path_mismatch(mocker, m5stickv, tdata):
     for case in cases:
         if len(case) > 3:
             wallet = Wallet(
-                Key(tdata.TEST_MNEMONIC, False, case[3], script_type=case[0])
+                Key(tdata.TEST_MNEMONIC, TYPE_SINGLESIG, case[3], script_type=case[0])
             )
         else:
             wallet = Wallet(
-                Key(tdata.TEST_MNEMONIC, False, NETWORKS["test"], script_type=case[0])
+                Key(
+                    tdata.TEST_MNEMONIC,
+                    TYPE_SINGLESIG,
+                    NETWORKS["test"],
+                    script_type=case[0],
+                )
             )
         signer = PSBTSigner(wallet, case[1], FORMAT_NONE)
         path_mismatch = signer.path_mismatch()
@@ -747,12 +801,12 @@ def test_path_mismatch(mocker, m5stickv, tdata):
 def test_sign_sats_vB(m5stickv):
     from embit.networks import NETWORKS
     from krux.psbt import PSBTSigner
-    from krux.key import Key
+    from krux.key import Key, TYPE_SINGLESIG, TYPE_MULTISIG
     from krux.wallet import Wallet
     from krux.qr import FORMAT_PMOFN
 
     MNEMONIC = "action action action action action action action action action action action action"
-    wallet = Wallet(Key(MNEMONIC, False, NETWORKS["test"]))
+    wallet = Wallet(Key(MNEMONIC, TYPE_SINGLESIG, NETWORKS["test"]))
 
     PSBT_satvB_1_31 = "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"
     signer = PSBTSigner(wallet, PSBT_satvB_1_31, FORMAT_PMOFN)
@@ -810,7 +864,8 @@ def test_sign_sats_vB(m5stickv):
         == "Inputs (7): ₿ 0.00 002 100\n\nSpend (3): ₿ 0.00 000 997\n\nFee: ₿ 0.00 001 103 (110.7%) ~1.8 sat/vB"
     )
 
-    wallet = Wallet(Key(MNEMONIC, True, NETWORKS["test"]))
+    # TODO: Add a descriptor so change can be deteted
+    wallet = Wallet(Key(MNEMONIC, TYPE_MULTISIG, NETWORKS["test"]))
     PSBT_satvB_164_83 = "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"
     signer = PSBTSigner(wallet, PSBT_satvB_164_83, FORMAT_PMOFN)
     outputs, _ = signer.outputs()
